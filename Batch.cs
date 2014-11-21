@@ -30,11 +30,7 @@ public class BatchProcess
 
     public BatchProcess(SPWeb Web)
     {
-        _web = Web;
-        _methodBuilders = new List<StringBuilder>();
-        _addNewMethodBuilder();
-        _totalMethodsCount = 0;
-        OnError = OnErrorAction.Return;
+        Init(Web);
     }
 
     public string Run()
@@ -43,9 +39,14 @@ public class BatchProcess
 
         foreach (var methodBuilder in _methodBuilders)
         {
-            string Batch = String.Format(BATCH_FORMAT, OnError.ToString("g"), methodBuilder.ToString());
-            result.AppendLine(_web.ProcessBatchData(Batch));
+            if (!String.IsNullOrEmpty(methodBuilder.ToString()))
+            {
+                string Batch = String.Format(BATCH_FORMAT, OnError.ToString("g"), methodBuilder.ToString());
+                result.AppendLine(_web.ProcessBatchData(Batch));
+            }
         }
+
+        Init(_web);
 
         return result.ToString();
     }
@@ -96,6 +97,15 @@ public class BatchProcess
     private StringBuilder _currentMethodBuilder;
     private int _currentMethodsCount;
     private int _totalMethodsCount;
+
+    private void Init(SPWeb Web)
+    {
+        _web = Web;
+        _methodBuilders = new List<StringBuilder>();
+        _addNewMethodBuilder();
+        _totalMethodsCount = 0;
+        OnError = OnErrorAction.Return;
+    }
 
     private void _addNewMethodBuilder()
     {
